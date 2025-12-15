@@ -1,6 +1,6 @@
 # 🐉 Hydra SDK Demo App
 
-A **lightweight** web application for interacting with [Hydra Head Protocol](https://hydra.family) - **no `cardano-node` required!**
+A **lightweight** web application for interacting with [Hydra Head Protocol](https://hydra.family) | **no `cardano-node` required!**
 
 This demo allows you to manage a Hydra Head using only:
 - **Blockfrost API** for L1 (Cardano) interactions
@@ -17,7 +17,7 @@ This demo allows you to manage a Hydra Head using only:
 | 📥 **Commit UTxOs** | Select L1 UTxOs and commit them to the Head |
 | 💸 **In-Head Transactions** | Build and sign transactions inside the Head (fee=0) |
 | 📊 **View Snapshots** | Watch confirmed snapshots and UTxO state changes |
-| 🔒 **Head Lifecycle** | Init, Commit, Close, Fanout - full lifecycle management |
+| 🔒 **Head Lifecycle** | Init, Commit, Close, Fanout: full lifecycle management |
 | 📋 **Event Log** | Real-time event stream from the Hydra node |
 | ✂️ **UTxO Splitting** | Split large UTxOs for better commit flexibility |
 
@@ -104,23 +104,23 @@ curl -o protocol-parameters.json \
   https://raw.githubusercontent.com/cardano-scaling/hydra/master/hydra-cluster/config/protocol-parameters.json
 ```
 
-**Start hydra-node**:
+**Start hydra-node:**
 
 ```bash
-nix run github:cardano-scaling/hydra/0.20.0#hydra-node -- \
+nix run github:cardano-scaling/hydra#hydra-node -- \
   --node-id alice \
   --api-host 0.0.0.0 \
   --api-port 4001 \
   --blockfrost ./blockfrost-project.txt \
   --hydra-signing-key ./hydra.sk \
   --cardano-signing-key ./cardano.sk \
-  --hydra-scripts-tx-id "SCRIPT_IDS" \
+  --hydra-scripts-tx-id "<SCRIPTS_TX_ID>" \
   --ledger-protocol-parameters ./protocol-parameters.json \
   --persistence-dir ./persistence \
   --contestation-period 60s
 ```
 
-> **Note:** The `--hydra-scripts-tx-id` above is for Hydra v0.21.0 on Preview. Check [hydra-node/networks.json](https://github.com/cardano-scaling/hydra/blob/master/hydra-node/networks.json) for the specific versions/networks of `--hydra-scripts-tx-id`.
+> **Note:** Replace `<SCRIPTS_TX_ID>` with the correct value for your network. Find script IDs for the latest release in [hydra-node/networks.json](https://github.com/cardano-scaling/hydra/blob/master/hydra-node/networks.json).
 
 ### Step 5: Connect from Web App
 
@@ -130,7 +130,7 @@ nix run github:cardano-scaling/hydra/0.20.0#hydra-node -- \
 
 ## 📖 Head Lifecycle
 
-| Action | State Required | Description |
+| Action | Starting State | Description |
 |--------|----------------|-------------|
 | **🚀 Init** | Idle | Initialize a new Head |
 | **📥 Commit** | Initializing | Commit L1 UTxOs to the Head |
@@ -138,8 +138,6 @@ nix run github:cardano-scaling/hydra/0.20.0#hydra-node -- \
 | **💸 Send** | Open | Submit transactions in the Head |
 | **🔒 Close** | Open | Initiate Head closure |
 | **📤 Fanout** | FanoutPossible | Distribute final UTxOs back to L1 |
-
----
 
 ## 🌐 Network Configuration
 
@@ -151,49 +149,23 @@ The app auto-detects your network based on Blockfrost API key prefix:
 | `preview...` | Preview |
 | `preprod...` | Preprod |
 
-Find the correct `--hydra-scripts-tx-id` for your version in:
-👉 [hydra-node/networks.json](https://github.com/cardano-scaling/hydra/blob/master/hydra-node/networks.json)
-
 ## 🔧 Troubleshooting
 
 | Error | Solution |
 |-------|----------|
 | **"NoUTxOFound"** when starting hydra-node | Fund your `cardano.sk` wallet via faucet |
 | **"WebSocket connection failed"** | Make sure hydra-node is running |
-| **"404 Not Found"** fetching UTxOs | Normal for new wallets - fund via faucet |
+| **"404 Not Found"** fetching UTxOs | Normal for new wallets: fund via faucet |
 | **"Blockfrost error: 403"** | API key is for wrong network |
-| **"ScriptFailedInWallet / MissingScript"** | Script version mismatch - check `--hydra-scripts-tx-id` matches your hydra-node version |
+| **"ScriptFailedInWallet / MissingScript"** | Script version mismatch: check `--hydra-scripts-tx-id` matches your hydra-node version |
 
----
+## 🛠️ Technology Stack
 
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     Browser (React App)                      │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
-│  │  Wallet     │  │  Blockfrost │  │  Hydra WebSocket   │ │
-│  │  (.sk file) │  │  Provider   │  │  Connection        │ │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘ │
-└──────────────────────────────────────────────────────────────┘
-          │                    │                    │
-          ▼                    ▼                    ▼
-   ┌────────────┐      ┌────────────────┐   ┌────────────────┐
-   │ Hydra Node │      │   Blockfrost   │   │   Cardano L1   │
-   │  ws:4001   │      │   (preview)    │──▶│  (via BF API)  │
-   └────────────┘      └────────────────┘   └────────────────┘
-```
-
----
-
-## 🔧 Technology Stack
-
-- **React 19** + **TypeScript** - UI framework
-- **Vite** - Build tool
-- **Tailwind CSS** - Styling
-- **[@hydra-sdk](https://github.com/ADAPhilippines/hydra-sdk)** - Hydra client SDK
-- **Blockfrost API** - L1 chain queries and tx submission
+- **React 19** + **TypeScript** — UI framework
+- **Vite** — Build tool
+- **Tailwind CSS** — Styling
+- **[@hydra-sdk](https://github.com/ADAPhilippines/hydra-sdk)** — Hydra client SDK
+- **Blockfrost API** — L1 chain queries and tx submission
 
 ## 📚 References
 
@@ -202,6 +174,6 @@ Find the correct `--hydra-scripts-tx-id` for your version in:
 - [Blockfrost API](https://blockfrost.io/docs)
 - [Hydra SDK](https://github.com/ADAPhilippines/hydra-sdk)
 
-## License
+## 📄 License
 
 Apache 2.0
