@@ -164,7 +164,7 @@ The app auto-detects your network based on Blockfrost API key prefix:
 - **React 19** + **TypeScript** — UI framework
 - **Vite** — Build tool
 - **Tailwind CSS** — Styling
-- **[@hydra-sdk](https://github.com/ADAPhilippines/hydra-sdk)** — Hydra client SDK
+- **[@hydra-sdk](https://hydrasdk.com/)** — Hydra client SDK
 - **Blockfrost API** — L1 chain queries and tx submission
 
 ## 📚 References
@@ -172,7 +172,7 @@ The app auto-detects your network based on Blockfrost API key prefix:
 - [Hydra Documentation](https://hydra.family/head-protocol/)
 - [Cardano Testnet Faucet](https://docs.cardano.org/cardano-testnets/tools/faucet)
 - [Blockfrost API](https://blockfrost.io/docs)
-- [Hydra SDK](https://github.com/ADAPhilippines/hydra-sdk)
+- [Hydra SDK](https://github.com/Vtechcom/hydra-sdk)
 
 ## 📄 License
 
