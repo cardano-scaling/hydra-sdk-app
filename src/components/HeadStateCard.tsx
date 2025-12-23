@@ -8,6 +8,7 @@ interface HeadStateCardProps {
   headState: HeadState;
   headId: string | null;
   headBalance: number;
+  headUtxoCount: number;
   peers: Peer[];
   txRecipient: string;
   txAmount: string;
@@ -33,6 +34,7 @@ export const HeadStateCard: React.FC<HeadStateCardProps> = ({
   headState,
   headId,
   headBalance,
+  headUtxoCount,
   peers,
   txRecipient,
   txAmount,
@@ -121,6 +123,11 @@ export const HeadStateCard: React.FC<HeadStateCardProps> = ({
             <div className="flex items-center gap-2 pr-3 border-r border-border">
               <span className="text-xs text-slate-500">In Head:</span>
               <span className="text-sm font-semibold text-success">{formatAda(headBalance)} ₳</span>
+              {headUtxoCount > 1 && (
+                <span className="text-[10px] text-slate-500 bg-dark-bg px-1.5 py-0.5 rounded" title={`Using all ${headUtxoCount} UTxOs as inputs`}>
+                  {headUtxoCount} UTxOs
+                </span>
+              )}
             </div>
             <input
               type="text"

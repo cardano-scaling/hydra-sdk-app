@@ -503,25 +503,32 @@ const App = () => {
         if (!txRecipient || !txAmount || !skeyHex || !vkeyHex || !provider || headState !== 'Open') return;
         setTxSubmitting(true);
         try {
-            const myUtxo = Object.entries(headUtxos).find(([_, output]: [string, any]) => output.address === address);
-            if (!myUtxo) throw new Error('No UTxOs found in head for this wallet');
+            // Find ALL UTxOs belonging to the user
+            const myUtxos = Object.entries(headUtxos).filter(([_, output]: [string, any]) => output.address === address);
+            if (myUtxos.length === 0) throw new Error('No UTxOs found in head for this wallet');
 
-            const [txIn, txOut] = myUtxo;
-            const [inputTxHash, inputIndex] = txIn.split('#');
-            const inputLovelace = parseInt(txOut.value?.lovelace || txOut.value || '0');
+            // Calculate total available lovelace from all UTxOs
+            const totalLovelace = myUtxos.reduce((sum, [_, output]: [string, any]) => {
+                return sum + parseInt(output.value?.lovelace || output.value || '0');
+            }, 0);
+
             // Convert ADA to lovelace (user enters ADA, we convert to lovelace)
             const sendAmountAda = parseFloat(txAmount);
             const sendAmount = Math.floor(sendAmountAda * 1_000_000);
             if (sendAmount < 1_000_000) throw new Error('Minimum send amount is 1 ADA');
-            if (sendAmount > inputLovelace) throw new Error('Amount exceeds available balance');
+            if (sendAmount > totalLovelace) throw new Error(`Amount exceeds available balance (${(totalLovelace / 1_000_000).toFixed(2)} ADA across ${myUtxos.length} UTxO${myUtxos.length > 1 ? 's' : ''})`);
 
-            const changeAmount = inputLovelace - sendAmount;
+            const changeAmount = totalLovelace - sendAmount;
 
             // Build transaction using CardanoWASM (fee=0 for Hydra head transactions)
-            const inputTxId = CardanoWASM.TransactionHash.from_hex(inputTxHash);
-            const input = CardanoWASM.TransactionInput.new(inputTxId, parseInt(inputIndex));
+            // Add ALL user's UTxOs as inputs
             const inputs = CardanoWASM.TransactionInputs.new();
-            inputs.add(input);
+            for (const [txIn] of myUtxos) {
+                const [inputTxHash, inputIndex] = txIn.split('#');
+                const inputTxId = CardanoWASM.TransactionHash.from_hex(inputTxHash);
+                const input = CardanoWASM.TransactionInput.new(inputTxId, parseInt(inputIndex));
+                inputs.add(input);
+            }
 
             const outputs = CardanoWASM.TransactionOutputs.new();
             const recipientAddr = CardanoWASM.Address.from_bech32(txRecipient);
@@ -564,13 +571,16 @@ const App = () => {
         }
     };
 
-    // Calculate head balance
-    const headBalance = Object.entries(headUtxos)
-        .filter(([_, output]: [string, any]) => output.address === address)
-        .reduce((sum, [_, output]: [string, any]) => {
-            const lovelace = output.value?.lovelace || output.value || 0;
-            return sum + parseInt(lovelace);
-        }, 0);
+    // Calculate head balance and UTxO count for the user
+    const myHeadUtxos = Object.entries(headUtxos)
+        .filter(([_, output]: [string, any]) => output.address === address);
+
+    const headBalance = myHeadUtxos.reduce((sum, [_, output]: [string, any]) => {
+        const lovelace = output.value?.lovelace || output.value || 0;
+        return sum + parseInt(lovelace);
+    }, 0);
+
+    const headUtxoCount = myHeadUtxos.length;
 
     return (
         <div className="max-w-7xl mx-auto px-2 py-1">
@@ -684,6 +694,7 @@ const App = () => {
                                 headState={headState}
                                 headId={headId}
                                 headBalance={headBalance}
+                                headUtxoCount={headUtxoCount}
                                 peers={peers}
                                 txRecipient={txRecipient}
                                 txAmount={txAmount}
